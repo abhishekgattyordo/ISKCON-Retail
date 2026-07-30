@@ -1,0 +1,151 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+model Product {
+  id            String   @id
+  sku           String   @unique
+  name          String
+  category      String
+  price         Float
+  cost          Float
+  stock         Int
+  minStock      Int      @map("min_stock")
+  warehouseZone String   @map("warehouse_zone")
+  batchNo       String?  @map("batch_no")
+  barcode       String?  @unique
+  imageUrl      String?  @map("image_url")
+  status        String
+  lastUpdated   DateTime @default(now()) @map("last_updated")
+  supplier      String?
+  rating        Float?
+  description   String?
+  tags          String[]
+
+  @@map("products")
+}
+
+model WarehouseZone {
+  id                      String  @id
+  code                    String  @unique
+  name                    String
+  description             String?
+  capacityLimit           Int     @default(1000) @map("capacity_limit")
+  currentOccupancyPercent Int     @default(0) @map("current_occupancy_percent")
+  managerInCharge         String? @map("manager_in_charge")
+  securityLevel           String? @default("Standard") @map("security_level")
+
+  @@map("warehouse_zones")
+}
+
+model MaterialInwardNote {
+  id           String                   @id
+  grnNumber    String                   @unique @map("grn_number")
+  poNumber     String?                  @map("po_number")
+  vendorName   String                   @map("vendor_name")
+  invoiceDate  String?                  @map("invoice_date")
+  warehouse    String?
+  status       String                   @default("completed")
+  totalValue   Float                    @default(0.0) @map("total_value")
+  receivedBy   String?                  @map("received_by")
+  timestamp    String?
+  notes        String?
+  items        MaterialInwardNoteItem[]
+
+  @@map("material_inward_notes")
+}
+
+model MaterialInwardNoteItem {
+  id           String             @id @default(uuid())
+  sku          String
+  name         String
+  quantity     Int
+  unitCost     Float              @map("unit_cost")
+  sellingPrice Float?             @map("selling_price")
+  batchNo      String?            @map("batch_no")
+  expiryDate   String?            @map("expiry_date")
+  taxRate      Float              @map("tax_rate")
+  total        Float
+  inwardNoteId String             @map("inward_note_id")
+  inwardNote   MaterialInwardNote @relation(fields: [inwardNoteId], references: [id], onDelete: Cascade)
+
+  @@map("material_inward_note_items")
+}
+
+model POSOrder {
+  id             String         @id
+  orderNumber    String         @unique @map("order_number")
+  subtotal       Float
+  discountAmount Float          @default(0.0) @map("discount_amount")
+  taxAmount      Float          @default(0.0) @map("tax_amount")
+  total          Float
+  paymentMethod  String         @map("payment_method")
+  timestamp      String?
+  cashierName    String?        @map("cashier_name")
+  customerPhone  String?        @map("customer_phone")
+  customerName   String?        @map("customer_name")
+  salesTag       String?        @map("sales_tag")
+  upiId          String?        @map("upi_id")
+  items          POSOrderItem[]
+
+  @@map("pos_orders")
+}
+
+model POSOrderItem {
+  id              String   @id @default(uuid())
+  productId       String   @map("product_id")
+  productSku      String   @map("product_sku")
+  productName     String   @map("product_name")
+  productCategory String   @map("product_category")
+  productPrice    Float    @map("product_price")
+  quantity        Int
+  discountPercent Float    @default(0.0) @map("discount_percent")
+  customNote      String?  @map("custom_note")
+  orderId         String   @map("order_id")
+  order           POSOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("pos_order_items")
+}
+
+model SalesEvent {
+  id               String   @id
+  name             String
+  type             String
+  startDate        String?  @map("start_date")
+  endDate          String?  @map("end_date")
+  status           String   @default("active")
+  targetRevenue    Float    @default(0.0) @map("target_revenue")
+  currentRevenue   Float    @default(0.0) @map("current_revenue")
+  allocatedSKUs    Int      @default(10) @map("allocated_skus")
+  discountRule     String?  @map("discount_rule")
+  description      String?
+  bannerColor      String?  @default("bg-indigo-600") @map("banner_color")
+  stallLocation    String?  @map("stall_location")
+  managerName      String?  @map("manager_name")
+  booksSoldQty     Int?     @default(0) @map("books_sold_qty")
+  booksSoldRevenue Float?   @default(0.0) @map("books_sold_revenue")
+  giftsSoldQty     Int?     @default(0) @map("gifts_sold_qty")
+  giftsSoldRevenue Float?   @default(0.0) @map("gifts_sold_revenue")
+
+  @@map("sales_events")
+}
+
+model BarcodeRecord {
+  id           String  @id
+  productName  String  @map("product_name")
+  sku          String
+  barcodeValue String  @map("barcode_value")
+  batchNo      String? @map("batch_no")
+  format       String? @map("format") @default("code128")
+  generatedAt  String? @map("generated_at")
+  template     String?
+  printCount   Int?    @default(1) @map("print_count")
+
+  @@map("barcode_records")
+}

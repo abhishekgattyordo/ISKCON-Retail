@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[490],{9201:(e,s,n)=>{Promise.resolve().then(n.bind(n,97419))},97419:(e,s,n)=>{"use strict";n.r(s),n.d(s,{default:()=>u});var r=n(95155);function u(){return(0,r.jsx)("div",{className:"p-6 min-h-screen"})}n(12115)}},e=>{e.O(0,[441,255,358],()=>e(e.s=9201)),_N_E=e.O()}]);

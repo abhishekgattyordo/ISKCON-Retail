@@ -1,0 +1,11 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/inward/route": "/api/inward",
+  "/api/health/route": "/api/health",
+  "/api/events/route": "/api/events",
+  "/api/orders/route": "/api/orders",
+  "/api/products/route": "/api/products",
+  "/api/reports/summary/route": "/api/reports/summary",
+  "/env/page": "/env",
+  "/[[...slug]]/page": "/[[...slug]]"
+}
